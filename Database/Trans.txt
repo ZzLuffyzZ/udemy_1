@@ -1,0 +1,26 @@
+Phantom reads: 
++ Transaction A đọc một tập hợp các dữ liệu đáp ứng một số điều kiện tìm kiếm, 
++ Transaction B tạo ra một dữ liệu mới khớp với điều kiện được tìm kiếm cho transaction A.(commit)
++ Transaction A thực hiện lại điều kiện tìm kiếm ở step 1.
+
+Serialization Anomaly: 
++ Các transaction thực hiện 1 cách không tuần tự.
++ Tham khảo: https://viblo.asia/p/014-postgresql-transaction-isolation-OeVKB67JKkW
+
+Nonrepeatable reads:
++ Xảy ra khi một transaction đọc cùng 1 dữ liệu 2 lần nhưng lại nhận được giá trị khác nhau. Ví dụ: transaction A đọc 1 dữ liệu, transaction B cập nhật xóa dữ liệu đó. Nếu A đọc lại dữ liệu đó nó sẽ lấy các giá trị là khác nhau.
+
+Serializable:
++ Là mức cao nhất của isolation levels, đảm bảo read và write locks. Trong trường hợp phép read có mệnh đề điều kiện, Serializable cũng cần đòi hỏi range lock để tránh phantom reads.
+
++------------------+------------------------+--------------------+------------------------+-----------------------+
+| Isolation Level  | Dirty Read             | Nonrepeatable Read | Phantom Read           | Serialization Anomaly |
++------------------+------------------------+--------------------+------------------------+-----------------------+
+| Read uncommitted | Allowed, but not in PG | Possible           | Possible               | Possible              |
++------------------+------------------------+--------------------+------------------------+-----------------------+
+| Read committed   | Not possible           | Possible           | Possible               | Possible              |
++------------------+------------------------+--------------------+------------------------+-----------------------+
+| Repeatable read  | Not possible           | Not possible       | Allowed, but not in PG | Possible              |
++------------------+------------------------+--------------------+------------------------+-----------------------+
+| Serializable     | Not possible           | Not possible       | Not possible           | Not possible          |
++------------------+------------------------+--------------------+------------------------+-----------------------+

@@ -1,0 +1,4 @@
+- Chia thành nhiều bảng con(trong cùng 1 connect).
+- Chia partition cho bảng(ngang, dọc nếu cần thiết).
+- Đánh chỉ mục với các trường dùng với mệnh đề where.
+- Tối ưu câu query.

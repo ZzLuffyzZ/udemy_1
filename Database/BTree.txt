@@ -1,0 +1,27 @@
+* Full table scan(sequential scan): là quá trình quét được thực hiện trên cơ sở dữ liệu trong đó mỗi hàng của bảng được đọc theo thứ tự tuần tự (nối tiếp) và các cột gặp phải sẽ được kiểm tra tính hợp lệ của một điều kiện. Thường là phương pháp quét chậm nhất do số lượng lớn các lần đọc được yêu cầu từ đĩa. Điều này xảy ra khi thực hiện truy vấn mà các điều kiện tìm kiếm không được lập chỉ mục.
+
+
+* Original B-tree: 
+- Có mục đích là giảm thiều không gian tìm kiếm.
+- Là một tập hợp các node.
+- Nếu B-tree có "m" bậc, 1 số node có thể có m node con(database tự động thực hiện điều này). Điều này có thể hiều là số lượng node con tối đa mà 1 node có thể có.
+- Nếu 1 node có m node con, thì node đó có tối đa m-1 phần tử.
+- Element có định dạng là key:value.
+- Value thường là con trỏ tới hàng (có thể là khoá chính hoặc khoá phụ của bảng).
+- Root node: node trên cùng.
+- Leaf node: node không có node con.
+- 1 node = disk page.
+- Giới hạn:
++ Mỗi node đều lưu trữ key: value -> Nhiều node -> Nhiều disk page -> Nhiều lần đọc -> slow
++ Nếu chỉ thực hiện tìm kiếm key và không cần dữ liệu khác trong DB thì value trong b-tree đang không cần thiết -> lãng phí bộ nhớ.
++ Truy vấn chậm khi thực hiện tìm kiếm theo phạm vi vì với mỗi giá trị trong query thì b-tree sẽ thực hiện truy vấn lại từ đầu.
+
+* How the original b-tree helps performance:
+Thay vì full table scan, b-tree sẽ thực hiện so sánh value trong câu query với key ở các node và tìm đến chính xác node có giá trị tương ứng.
+
+* B+tree:
+- Giống như B-tree nhưng các node chỉ lưu trữ key.
+- Value chỉ được lưu ở các node lá(node cuối cùng).
+- Các node lá được liên kết với nhau nên nếu tìm được 1 key, ta có thể tìm được các giá trị trước và sau key đó -> Thực hiện truy vấn theo phạm vi tốt hơn.
+- Các node nhỏ hơn b-tree -> Dễ dàng đưa các node vào bên trong bộ nhớ -> Truyền tải nhanh hơn.
+- Hầu hết các hệ quản trị cơ sở dữ liệu (Database Management System - DBMS) sử dụng b+tree.

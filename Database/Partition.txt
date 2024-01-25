@@ -1,0 +1,48 @@
+* Horizontal: Chia các phân vùng theo hàng.
+
+* Vertical: Chia các phân vùng theo cột.
+
+* Các loại phân vùng ngang:
+- List: Chia các giá trị cụ thể thành từng vùng.
+- Range: Chia các khoảng giá trị liên tục thành từng vùng.
+- Hash: Mã hoá 1 trường và phân vùng theo kq mã hoá.
+* Partitioning vs Sharding
+
+- Khái niệm:
++--------------+--------------------------------+--------------------------------------------+--------------------------------+----------------------------------------------+
+|              | Mục tiêu                       | Mục đích                                   | Không gian lưu trữ             | Sự Liên Kết                                  |
++--------------+--------------------------------+--------------------------------------------+--------------------------------+----------------------------------------------+
+| Partitioning | Phân vùng là quá trình chia    | Mục đích chính là tối ưu hóa hiệu suất     | Dữ liệu vẫn được lưu trữ trong | Dữ liệu trong cùng một bảng vẫn liên kết và  |
+|              | một bảng lớn thành các         | truy cập dữ liệu và quản lý dữ liệu lớn.   | một cơ sở dữ liệu duy nhất,    | có thể thực hiện các truy vấn liên quan      |
+|              | phần nhỏ hơn gọi là partition  | Nó giúp giảm độ phức tạp của các truy vấn  | nhưng nó được tổ chức thành    | đến toàn bộ bảng. Phương pháp này thường     |
+|              | dựa trên một hoặc nhiều cột    | và giảm thời gian cần để thực hiện các     | các phân vùng riêng biệt.      | được sử dụng trong một hệ thống              |
+|              |                                | thao tác như tìm kiếm và sắp xếp.          |                                | cơ sở dữ liệu duy nhất.                      |
++--------------+--------------------------------+--------------------------------------------+--------------------------------+----------------------------------------------+
+| Sharding     | Sharding là quá trình chia     | Mục đích chính của sharding là cải thiện   | Dữ liệu được phân chia và phân | Dữ liệu được phân tán trên các máy           |
+|              | dữ liệu và phân tán nó trên    | khả năng mở rộng của hệ thống.             | tán trên nhiều máy chủ,        | chủ riêng biệt và không còn liên kết         |
+|              | nhiều máy chủ (nodes) hoặc     | Nó giúp xử lý lượng dữ liệu lớn và tăng    | với mỗi máy chủ chứa một       | trực tiếp với nhau. Các truy vấn có          |
+|              | cụm máy chủ (clusters).        | cường hiệu suất bằng cách phân chia        | phần nhỏ của toàn bộ dữ liệu.  | thể yêu cầu sự kết hợp của dữ liệu           |
+|              |  Mỗi máy chủ chứa một          | công việc giữa nhiều máy chủ.              |                                | từ nhiều máy chủ khác nhau.                  |
+|              | phần của dữ liệu.              |                                            |                                |                                              |
++--------------+--------------------------------+--------------------------------------------+--------------------------------+----------------------------------------------+
+
+- Ưu nhược điểm:
++--------------+---------------------------------------------------------+-----------------------------------------------------+
+|              | Ưu điểm                                                 | Nhược điểm                                          |
++--------------+---------------------------------------------------------+-----------------------------------------------------+
+| Partitioning | - Cải thiện hiệu suất truy vấn                          | - Update dữ liệu mà dữ liệu đó phải chuyển          |
+|              | - Quyết định câu truy vấn sẽ sử dụng                    | từ phân vùng này sang phân vùng khác sẽ chậm.       |
+|              | việc quét tuần tự hay quét chỉ mục                      | - Câu truy vấn mà phải quét tất cả các vùng         |
+|              | - Tự động phân vùng                                     | sẽ chậm.                                            |
+|              | - Có thể lưu trữ các phân vùng data cũ,                 |                                                     |
+|              | không được sử dụng đến vào vùng lưu trữ                 |                                                     |
+|              | rẻ hơn.                                                 |                                                     |
++--------------+---------------------------------------------------------+-----------------------------------------------------+
+| Sharding     | - Có khả năng mở rộng (database, memory, CPU)           | - Phức tạp khi cấu hình kết nối.                    |
+|              | - Bảo mật(người dùng chỉ được truy                      | - Việc thực hiện trans trên các cổng sẽ phức tạp    |
+|              | cập DB được cấp phép)                                   | - Việc join các table bị ảnh hưởng.                 |
+|              | - Tối ưu vì các chỉ mục sẽ có kích thước ngày cảng nhỏ. | - Khi thay đổi kết cấu của bảng thì                 |
+|              |                                                         | sẽ phải thay đổi tất cả các table ở kết nối khác.   |
+|              |                                                         | - Khi thực hiện viết câu truy vấn, người viết phải  |
+|              |                                                         | biết chính xác table mình đang thao tác có gì.      |
++--------------+---------------------------------------------------------+-----------------------------------------------------+

@@ -1,0 +1,6 @@
+Shared lock: Khi 1 trans A đọc dữ liệu(chưa commit) thì trans B không thể update dữ liệu mà trans A đang đọc. Dữ liệu mà trans A đang được lock bởi cơ chế shared lock.
+
+Exclusive lock: Khi 1 trans A đang update dữ liệu(chưa commit) thì trans B không thể đọc hay update dữ liệu mà trans A đang update. Dữ liệu mà trans A đang được lock bởi cơ chế exclusive lock.
+
+Dead lock: Khi thực hiện nhiều trans, các dịch phải chờ đợi giải phóng dữ liệu ở trans khác đang giữ thì sẽ dẫn đến dead lock.
+EX: Khi trans A thực hiện update lần lượt dữ liệu C và D, trans B thực hiện update lần lượt dữ liệu D và C. Trong trường hợp này, trans A đã lock C và cố gắng lock D, trans B đã lock D và cố gắng lock C. Cả 2 trans đều cần chờ giải phóng dữ liệu mà trans còn lại đang giữ. Điêù này gọi là dead lock.
