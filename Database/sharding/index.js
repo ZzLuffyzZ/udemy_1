@@ -67,6 +67,9 @@ const clients = {
 
 app.get("/:tenant/:id", async (req, res) => {
     const { tenant, id } = req.params;
+    if (!clients[tenant]) {
+        return res.send({});
+    }
     const result = await clients[tenant]('url_table').where('url_id', id);
     return res.send({
         "urlId": tenant,
@@ -77,6 +80,9 @@ app.get("/:tenant/:id", async (req, res) => {
 app.post("/:tenant", async (req, res) => {
 
     const tenant = req.params.tenant;
+    if (!clients[tenant]) {
+        return res.send({});
+    }
     const uid = new ShortUniqueId({ length: 5, dictionary: 'alpha_upper' });
     const urlId = uid.randomUUID();
     await clients[tenant]('url_table').insert({
