@@ -25,7 +25,7 @@ name  )
 select 
 random()*100,
 substring(md5(random()::text ),0,floor(random()*31)::int)
- from generate_series(0, 1000000);
+ from generate_series(0, 1000);
 
 create index on grades(g);
 create index on grades(name);
