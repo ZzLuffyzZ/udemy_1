@@ -2,11 +2,10 @@
 -- + Phân vùng ngang: Chia table theo các row - bản ghi.
 -- + Phân vùng dọc: Chia table theo các column.
 
--- // Có 4 loại Partition 
+-- // Có 3 loại Partition 
 -- + Range Partition
 -- + List Partition
 -- + Hash Partition
--- + Key Partition
 
 -- // Note:
 -- + Partition sẽ được bắt đầu từ index bằng 0
@@ -16,22 +15,22 @@
 DROP TABLE Persons;
 
 -- Range Partition --
+
 CREATE TABLE Persons (
     id serial4 NOT NULL,
     name varchar(255) not null,
     age int2,
-    created_date timestamp DFAULT CURRENT_TIMESTAMP,
+    created_date timestamp DEFAULT CURRENT_TIMESTAMP,
     created_user VARCHAR(20) DEFAULT '9999',
-    PRIMARY KEY (id, age);
-)
-PARTITION BY RANGE (age) (
-	PARTITION p0 VALUES LESS THAN (1000), 
-	PARTITION p1 VALUES LESS THAN (10000), 
-	PARTITION p2 VALUES LESS THAN (50000),
-	PARTITION p3 VALUES LESS THAN (100000),
-	PARTITION p4 VALUES LESS THAN MAXVALUE
-);
-select * from Persons where age = 99000
+    PRIMARY KEY (id, age)
+) PARTITION BY RANGE (age);
+CREATE TABLE p_0 PARTITION OF Persons
+    FOR VALUES from (0) to (1000);
+CREATE TABLE p_1 PARTITION OF Persons
+    FOR VALUES from (1000) to (2000);
+CREATE TABLE p_2 PARTITION OF Persons
+    FOR VALUES from (2000) to (3000);
+select * from Persons where age = 2000
 
 -- List Partition --
 CREATE TABLE Person2 (
@@ -41,7 +40,7 @@ CREATE TABLE Person2 (
     created_date timestamp  DEFAULT CURRENT_TIMESTAMP,
     created_user VARCHAR(20) DEFAULT '9999',
     PRIMARY KEY (id, month)
-)
+) PARTITION BY LIST (month);
 PARTITION BY LIST (month) (
     PARTITION pX VALUES IN (1,2,3),
     PARTITION pH VALUES IN (4,5,6),
@@ -49,12 +48,15 @@ PARTITION BY LIST (month) (
     PARTITION pD VALUES IN (10,11,12)
 );
 
+CREATE TABLE pX PARTITION OF sales_region FOR VALUES IN (1,2,3);
+
+CREATE TABLE pY PARTITION OF sales_region FOR VALUES IN (4,5,6);
+
+CREATE TABLE pZ PARTITION OF sales_region FOR VALUES IN (7,8,9);
 -- value thuộc 1 tập constant, nếu insert ngoài giá trị thì bị lỗi,
 -- nên chọn những cái cố định như ngày , tháng.
 
 SELECT * FROM Person2 WHERE month = 2;
-
-SELECT * FROM Person2 WHERE name = 'chung_10000';
 
 -- Hash Partition ---
 CREATE TABLE Person3 (
@@ -64,36 +66,11 @@ CREATE TABLE Person3 (
     created_user VARCHAR(20) DEFAULT '9999',
     store_id int2,
     PRIMARY KEY (id, store_id)
-)
-PARTITION BY HASH(store_id)
-PARTITIONS 10;
-
+)PARTITION BY HASH(store_id);
+CREATE TABLE p1 PARTITION OF Person3 FOR VALUES WITH (MODULUS 5,REMAINDER 0);
+CREATE TABLE p2 PARTITION OF Person3 FOR VALUES WITH (MODULUS 5,REMAINDER 1);
+CREATE TABLE p3 PARTITION OF Person3 FOR VALUES WITH (MODULUS 5,REMAINDER 2);
+CREATE TABLE p4 PARTITION OF Person3 FOR VALUES WITH (MODULUS 5,REMAINDER 3);
+CREATE TABLE p5 PARTITION OF Person3 FOR VALUES WITH (MODULUS 5,REMAINDER 4);
 -- Không giống như Range và List, Hash Partition không cần define trước value để quyết định xem row insert sẽ đc assign vào partition nào một cách tự động
 -- Hash Partition chỉ sử dụng trên 1 column.
--- nếu k định nghĩa số lượng partition. thì sẽ default là 1
-
--- Key Partition ---
--- Tương tự như Hash Partition thì Key Partition có thể sử dụng 0 hoặc n column để partition.
--- Trường hợp không truyền column để partition thì primary key hoặc unique key sẽ auto được chọn, k có primary key hay unique thì sẽ báo lỗi.
-CREATE TABLE serverlogs4 (
-    serverid int2 NOT NULL, 
-    logdata VARCHAR(30),
-    created timestamp NOT NULL,
-    UNIQUE KEY (serverid)
-)
-PARTITION BY KEY()
-PARTITIONS 10;
-
-CREATE TABLE serverlogs5 (
-    serverid int2 NOT NULL, 
-    logdata VARCHAR(30),
-    created timestamp NOT NULL,
-    label VARCHAR(10) NOT NULL
-)
-PARTITION BY KEY(serverid, label, created)
-PARTITIONS 10;
-
--- // TH search and ra 20 bộ key mà partition có 10 thì sẽ như nào. ???????
--- => TH partition key thì nó k có trên postgres và tên mysql nó sẽ là cả cụm key partion nên bình thường ít ai dùng.
--- // Vs Person2 thì TH mà search nhiều tháng lệch partition thì sẽ làm như nào để nhanh ??????
--- => Thì phải cân đối cách chia partition, ví dụ chia nhỏ hơn thành 12 tháng.Còn như hiện tại nếu search tháng 1 và tháng 4 vì vẫn tìm ở 2 vùng partition pX và pH
